@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from smac.env.multiagentenv import MultiAgentEnv
+from smacv2.env.multiagentenv import MultiAgentEnv
 from envs.starcraft.smac_maps import get_map_params
 
 import atexit
@@ -327,10 +327,10 @@ class StarCraft2Env(MultiAgentEnv):
                 self.map_x, int(self.map_y / 8))
             self.pathing_grid = np.transpose(np.array([
                 [(b >> i) & 1 for b in row for i in range(7, -1, -1)]
-                for row in vals], dtype=bool))
+                for row in vals], dtype=np.bool))
         else:
             self.pathing_grid = np.invert(np.flip(np.transpose(np.array(
-                list(map_info.pathing_grid.data), dtype=bool).reshape(
+                list(map_info.pathing_grid.data), dtype=np.bool).reshape(
                     self.map_x, self.map_y)), axis=1))
 
         self.terrain_height = np.flip(
@@ -1201,7 +1201,7 @@ class StarCraft2Env(MultiAgentEnv):
         """
         arr = np.zeros(
             (self.n_agents, self.n_agents + self.n_enemies), 
-            dtype=bool,
+            dtype=np.bool,
         )
 
         for agent_id in range(self.n_agents):
