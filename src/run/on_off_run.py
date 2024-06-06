@@ -35,7 +35,23 @@ def run(_run, _config, _log):
     _log.info("\n\n" + experiment_params + "\n")
 
     # configure tensorboard logger
-    unique_token = "{}__{}".format(args.name, datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    # unique_token = "{}__{}".format(args.name, datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    unique_token = "{}/{}__{}__{}".format(args.env, args.env, args.name, "seed_"+str(args.seed)) 
+    if args.env == "sc2" or args.env == "sc2wrapped": 
+        unique_token = "StarCraft2/{}".format("--".join([
+            args.env_args["map_name"], 
+            args.name, 
+            args.cg_edges,
+            str(args.env_args["capability_config"]["n_units"])+"v"+str(args.env_args["capability_config"]["n_enemies"]), 
+            "seed_"+str(args.seed)
+        ]))
+    elif args.env == "stag_hunt": 
+        unique_token = "stag_hunt/{}".format("__".join([
+            args.env, 
+            args.name, 
+            "miscapture_punishment="+str(args.env_args["miscapture_punishment"]), 
+            "seed_"+str(args.seed)
+        ]))
     args.unique_token = unique_token
     if args.use_tensorboard:
         tb_logs_direc = os.path.join(dirname(dirname(dirname(abspath(__file__)))), "results", "tb_logs")
