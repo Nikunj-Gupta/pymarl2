@@ -19,3 +19,9 @@ REGISTRY["central_rnn"] = CentralRNNAgent
 REGISTRY["mlp"] = MLPAgent
 REGISTRY["att_rnn"] = ATTRNNAgent
 REGISTRY["noisy_rnn"] = NoisyRNNAgent
+
+
+from .gnn_agent import GNNAgent
+REGISTRY["gat"] = GNNAgent
+REGISTRY["gatv2"] = GNNAgent
+REGISTRY["gcn"] = GNNAgent
