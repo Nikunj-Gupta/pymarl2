@@ -25,3 +25,5 @@ from .gnn_agent import GNNAgent
 REGISTRY["gat"] = GNNAgent
 REGISTRY["gatv2"] = GNNAgent
 REGISTRY["gcn"] = GNNAgent
+from .gtn_agent import GTNAgent
+REGISTRY["gtn"] = GTNAgent
