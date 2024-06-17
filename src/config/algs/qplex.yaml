@@ -14,7 +14,7 @@ batch_size: 128
 
 # update the target network every {} episodes
 target_update_interval: 200
-t_max: 10050000
+# t_max: 10050000
 
 # use the Q_Learner to train
 agent_output_type: "q"

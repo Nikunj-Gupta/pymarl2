@@ -8,7 +8,7 @@ epsilon_anneal_time: 100000
 
 runner: "parallel"
 batch_size_run: 8
-t_max: 10050000
+# t_max: 10050000
 
 buffer_size: 5000
 

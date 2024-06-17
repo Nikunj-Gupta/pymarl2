@@ -14,7 +14,7 @@ off_buffer_size: 5000 # size of the off-policy buffer
 batch_size_run: 8 #10
 batch_size: 32
 off_batch_size: 64
-t_max: 10050000
+# t_max: 10050000
 
 env_args:
   state_last_action: False # critic adds last action internally
