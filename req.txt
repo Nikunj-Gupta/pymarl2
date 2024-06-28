@@ -1,0 +1,8 @@
+numpy
+sacred
+torch
+pyyaml
+git+https://github.com/oxwhirl/smacv2.git
+matplotlib
+setproctitle
+tensorboard_logger

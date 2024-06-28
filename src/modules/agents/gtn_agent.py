@@ -11,17 +11,18 @@ from torch_geometric.data import Data as gData
 from torch_geometric.data import Batch
 
 class GNN(nn.Module):
-    def __init__(self, in_channels=1024, out_channels=1024, num_nodes=None):
+    def __init__(self, in_channels=1024, out_channels=1024, num_nodes=None, cg_edges=None):
         super().__init__()
         self.N = num_nodes 
         self.feature_norm = nn.LayerNorm(in_channels)
+        self.A = self.get_adjacency_matrix(type=cg_edges) 
         self.gnn = GTN(
-                       num_edge=3, 
-                       num_channels=2, 
+                       num_edge=self.N, 
+                       num_channels=3, 
                        w_in=in_channels, 
                        w_out=out_channels, 
                        num_nodes=self.N, 
-                       num_layers=1
+                       num_layers=2
                     )  
 
     def get_edge_index(self, type="star"): # need an initial graph construction 
@@ -37,19 +38,25 @@ class GNN(nn.Module):
         edge_index = th.tensor(edges).T # # arrange agents in a line     
         return edge_index.cuda() 
 
-    def get_adjacency_matrix(self): 
+    def get_adjacency_matrix(self, type="allstar"): 
         A = [] 
-        for t in ["line", "cycle", "star"]: 
-            edges = self.get_edge_index(type=t) 
-            value_tmp = th.ones(edges.shape[1]).type(th.cuda.FloatTensor) 
-            A.append((edges, value_tmp)) 
+        if type=="lcs": 
+            for t in ["line", "cycle", "star"]: 
+                edges = self.get_edge_index(type=t) 
+                value_tmp = th.ones(edges.shape[1]).type(th.cuda.FloatTensor) 
+                A.append((edges, value_tmp)) 
+        elif type=="allstar": 
+            all_edges = [[(k,i) for i in range(self.N) if i!=k] for k in range(self.N)] 
+            for e in all_edges: 
+                edges = th.tensor(e).T.cuda() 
+                value_tmp = th.ones(edges.shape[1]).type(th.cuda.FloatTensor) 
+                A.append((edges, value_tmp)) 
         return A 
 
     def forward(self, x):        
-        x = self.feature_norm(x) 
-        A = self.get_adjacency_matrix() 
+        x = self.feature_norm(x)  
         eval = not self.training 
-        x, H, Ws = self.gnn(A, x, num_nodes=self.N, eval=eval) 
+        x, H, Ws = self.gnn(self.A, x, num_nodes=self.N, eval=eval) 
         return x 
 
 class GTNAgent(nn.Module):
@@ -57,37 +64,26 @@ class GTNAgent(nn.Module):
         super(GTNAgent, self).__init__()
         self.args = args
         self.agent = args.agent 
+        self.cg_edges = args.cg_edges 
 
         print(f"Using {self.agent} Agent") 
-
-        self.fc1 = nn.Linear(input_shape, args.rnn_hidden_dim)
-        self.gnn = GNN(args.rnn_hidden_dim, args.rnn_hidden_dim, num_nodes=args.n_agents) 
+        self.gnn = GNN(input_shape, args.rnn_hidden_dim, num_nodes=args.n_agents, cg_edges=self.cg_edges) 
         self.rnn = nn.GRUCell(args.rnn_hidden_dim, args.rnn_hidden_dim)
         self.fc2 = nn.Linear(args.rnn_hidden_dim, args.n_actions)
 
-        if getattr(args, "use_layer_norm", False):
-            self.layer_norm = LayerNorm(args.rnn_hidden_dim)
-        
-        if getattr(args, "use_orthogonal", False):
-            orthogonal_init_(self.fc1)
-            orthogonal_init_(self.fc2, gain=args.gain)
-
     def init_hidden(self):
+        return 
         # make hidden states on same device as model
-        return self.fc1.weight.new(1, self.args.rnn_hidden_dim).zero_()
+        # return self.gnn.weight.new(1, self.args.rnn_hidden_dim).zero_() 
 
     def forward(self, inputs, hidden_state):
         b, a, e = inputs.size()
 
         inputs = inputs.view(-1, e)
-        x = F.relu(self.fc1(inputs), inplace=True)
-        x = self.gnn(x) 
-        h_in = hidden_state.reshape(-1, self.args.rnn_hidden_dim)
-        hh = self.rnn(x, h_in)
-
-        if getattr(self.args, "use_layer_norm", False):
-            q = self.fc2(self.layer_norm(hh))
-        else:
-            q = self.fc2(hh)
-
-        return q.view(b, a, -1), hh.view(b, a, -1)
+        x = self.gnn(inputs) 
+        if hidden_state is not None:
+            hidden_state = hidden_state.reshape(-1, self.args.rnn_hidden_dim)
+    
+        h = self.rnn(x, hidden_state)
+        q = self.fc2(h)
+        return q.view(b, a, -1), h.view(b, a, -1) 
