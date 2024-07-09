@@ -2,10 +2,21 @@ import os
 PARALLEL = False 
 
 CONFIGS = ["qmix", "vdn", "iql", "qtran", "qatten", "qplex", "cw_qmix", "ow_qmix"]
+CONFIGS = ["qmix", "vdn", "cw_qmix", "ow_qmix"]
 ENVS = ["gather", "hallway", "pursuit", "disperse", "sensor", "aloha"] 
 GNN_QMIX = ["gcn", "gat", "gatv2"] 
 CG_EDGES = ["full", "line", "cycle", "star"] 
-SEEDS = 5 
+SEEDS = 3 
+
+"""
+GTN-cgedges-new
+"""
+for s in range(SEEDS): 
+    for e in ENVS:
+        for cg_edges in CG_EDGES: 
+            command = f"CUDA_VISIBLE_DEVICES=2 python3 src/main.py --config=ow_qmix --env-config={e} with agent=gtn cg_edges={cg_edges} use_cuda=True seed={s}" 
+            if PARALLEL: command += " &" 
+            os.system(command) 
 
 # """
 # Baselines 
@@ -33,6 +44,8 @@ SEEDS = 5
 # """
 # for s in range(SEEDS): 
 #     for e in ENVS:
-#         command = f"CUDA_VISIBLE_DEVICES=7 python3 src/main.py --config=qmix --env-config={e} with agent=gtn use_cuda=True seed={s}" 
+#         # command = f"CUDA_VISIBLE_DEVICES=5 python3 src/main.py --config=qmix --env-config={e} with agent=gtn use_cuda=True seed={s} cg_edges=fff" 
+#         # command = f"CUDA_VISIBLE_DEVICES=4 python3 src/main.py --config=qmix --env-config={e} with agent=gtn use_cuda=True seed={s} cg_edges=fffff" 
+#         command = f"CUDA_VISIBLE_DEVICES=3 python3 src/main.py --config=qmix --env-config={e} with agent=gtn use_cuda=True seed={s} cg_edges=ffffffffff" 
 #         if PARALLEL: command += " &" 
 #         os.system(command) 

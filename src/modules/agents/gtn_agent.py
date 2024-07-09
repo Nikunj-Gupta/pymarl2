@@ -18,11 +18,11 @@ class GNN(nn.Module):
         self.A = self.get_adjacency_matrix(type=cg_edges) 
         self.gnn = GTN(
                        num_edge=self.N, 
-                       num_channels=3, 
+                       num_channels=self.N, 
                        w_in=in_channels, 
                        w_out=out_channels, 
                        num_nodes=self.N, 
-                       num_layers=2
+                       num_layers=self.N
                     )  
 
     def get_edge_index(self, type="star"): # need an initial graph construction 
@@ -49,6 +49,11 @@ class GNN(nn.Module):
             all_edges = [[(k,i) for i in range(self.N) if i!=k] for k in range(self.N)] 
             for e in all_edges: 
                 edges = th.tensor(e).T.cuda() 
+                value_tmp = th.ones(edges.shape[1]).type(th.cuda.FloatTensor) 
+                A.append((edges, value_tmp)) 
+        elif type=="line" or type=="cycle" or type=="star" or type=="full": 
+            for t in [type]*self.N: 
+                edges = self.get_edge_index(type=t) 
                 value_tmp = th.ones(edges.shape[1]).type(th.cuda.FloatTensor) 
                 A.append((edges, value_tmp)) 
         return A 
