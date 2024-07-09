@@ -36,25 +36,25 @@ class GNN(nn.Module):
         elif type == 'star':     # arrange all agents in a star around agent 0
             edges = [(0, i + 1) for i in range(self.N - 1)] 
         edge_index = th.tensor(edges).T # # arrange agents in a line     
-        return edge_index.cuda() 
+        return edge_index
 
     def get_adjacency_matrix(self, type="allstar"): 
         A = [] 
         if type=="lcs": 
             for t in ["line", "cycle", "star"]: 
                 edges = self.get_edge_index(type=t) 
-                value_tmp = th.ones(edges.shape[1]).type(th.cuda.FloatTensor) 
+                value_tmp = th.ones(edges.shape[1]).type(th.FloatTensor) 
                 A.append((edges, value_tmp)) 
         elif type=="allstar": 
             all_edges = [[(k,i) for i in range(self.N) if i!=k] for k in range(self.N)] 
             for e in all_edges: 
-                edges = th.tensor(e).T.cuda() 
-                value_tmp = th.ones(edges.shape[1]).type(th.cuda.FloatTensor) 
+                edges = th.tensor(e).T 
+                value_tmp = th.ones(edges.shape[1]).type(th.FloatTensor) 
                 A.append((edges, value_tmp)) 
         elif type=="line" or type=="cycle" or type=="star" or type=="full": 
             for t in [type]*self.N: 
                 edges = self.get_edge_index(type=t) 
-                value_tmp = th.ones(edges.shape[1]).type(th.cuda.FloatTensor) 
+                value_tmp = th.ones(edges.shape[1]).type(th.FloatTensor) 
                 A.append((edges, value_tmp)) 
         return A 
 

@@ -3,6 +3,9 @@ sacred
 torch
 pyyaml
 git+https://github.com/oxwhirl/smacv2.git
+torch_geometric
+torch_sparse
+torch_scatter
 matplotlib
 setproctitle
 tensorboard_logger

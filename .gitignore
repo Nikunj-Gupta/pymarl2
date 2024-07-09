@@ -5,3 +5,6 @@ results*/
 *.png
 *.zip
 .DS_Store
+slurm*
+SMAC_Maps/
+runs_discovery/*
