@@ -1,22 +1,35 @@
 import os 
-PARALLEL = False 
 
-CONFIGS = ["qmix", "vdn", "iql", "qtran", "qatten", "qplex", "cw_qmix", "ow_qmix"]
-CONFIGS = ["qmix", "vdn", "cw_qmix", "ow_qmix"]
-ENVS = ["gather", "hallway", "pursuit", "disperse", "sensor", "aloha"] 
-GNN_QMIX = ["gcn", "gat", "gatv2"] 
-CG_EDGES = ["full", "line", "cycle", "star"] 
-SEEDS = 3 
+def baselines(): 
+    CONFIGS = ["qmix", "vdn", "iql", "qtran", "qatten", "qplex", "cw_qmix", "ow_qmix"]
+    ENVS = ["gather", "hallway", "pursuit", "disperse", "sensor", "aloha"] 
+    SEEDS = 3 
+    PARALLEL = False 
 
-"""
-GTN-cgedges-new
-"""
-for s in range(SEEDS): 
-    for e in ENVS:
-        for cg_edges in CG_EDGES: 
-            command = f"CUDA_VISIBLE_DEVICES=2 python3 src/main.py --config=ow_qmix --env-config={e} with agent=gtn cg_edges={cg_edges} use_cuda=True seed={s}" 
-            if PARALLEL: command += " &" 
-            os.system(command) 
+    for s in range(SEEDS): 
+        for e in ENVS:
+            for a in CONFIGS: 
+                command = f"python3 src/main.py --config={a} --env-config={e} with use_cuda=False seed={s}" 
+                if PARALLEL: command += " &" 
+                os.system(command) 
+baselines() 
+
+# CONFIGS = ["qmix", "vdn", "iql", "qtran", "qatten", "qplex", "cw_qmix", "ow_qmix"]
+# CONFIGS = ["qmix", "vdn", "cw_qmix", "ow_qmix"]
+# ENVS = ["gather", "hallway", "pursuit", "disperse", "sensor", "aloha"] 
+# GNN_QMIX = ["gcn", "gat", "gatv2"] 
+# CG_EDGES = ["full", "line", "cycle", "star"] 
+# SEEDS = 3 
+
+# """
+# GTN-cgedges-new
+# """
+# for s in range(SEEDS): 
+#     for e in ENVS:
+#         for cg_edges in CG_EDGES: 
+#             command = f"CUDA_VISIBLE_DEVICES=2 python3 src/main.py --config=ow_qmix --env-config={e} with agent=gtn cg_edges={cg_edges} use_cuda=True seed={s}" 
+#             if PARALLEL: command += " &" 
+#             os.system(command) 
 
 # """
 # Baselines 

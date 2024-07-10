@@ -1,7 +1,6 @@
 all: 
 	clear 
-	# pip install -r req.txt 
-	python ../src/main.py --config=qmix --env-config=gather with agent=gtn seed=0 use_cuda=False cg_edges=full
+	python src/main.py --config=qmix --env-config=gather with seed=0 use_cuda=False 
 	
 request: 
 	clear 
